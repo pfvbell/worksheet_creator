@@ -10,11 +10,14 @@ pandas = "*"
 numpy = "*"
 htmldocx = "*"
 pybase64 = "*"
-transformers = "*"
-torch = "*"
-en-core-web-sm = {file = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz"}
-sentencepiece = "*"
+sentencepiece = "==0.1.96"
 spacy = "*"
+tokenizers = "==0.10.3"
+torch = "==1.7.1"
+transformers = "==4.12.5"
+datasets = "==1.16.1"
+en-core-web-sm = {file = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz"}
+bing-image-downloader = "*"
 
 [dev-packages]
 

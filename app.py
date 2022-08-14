@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 # import aspose.words as aw
 from htmldocx import HtmlToDocx
+from bing_image_downloader import downloader
+import os
 
 from questiongenerator import QuestionGenerator
 
@@ -21,94 +23,121 @@ worksheet_title = st.text_input("Insert Worksheet Title", key="w_Title")
 
 learn_text = st.text_input("Insert what you want your students to learn", key="knowledge")
 
-# Define Question Generator
-qg = QuestionGenerator()
-qa_list = qg.generate(
-    learn_text, 
-    num_questions=10, 
-    answer_style='all'
-)
+if learn_text:
 
-questions = [text['question'] for text in qa_list]
-st.text(questions[0])
-st.text(questions[1])
+    with st.spinner(text='In progress'):
 
-### Add Model to create Questions here ###
+        # Define Question Generator
+        qg = QuestionGenerator()
+        qa_list = qg.generate(
+            learn_text, 
+            num_questions=5, 
+            answer_style='all'
+        )
 
-st.write(st.session_state.knowledge)
+        questions = [text['question'] for text in qa_list]
+        st.text(qa_list)
 
-### Select Subject ###
+        ### Add Model to create Questions here ###
 
+        # st.write(st.session_state.knowledge)
 
-### Select Age slider - lowest and highest ###
-
-add_slider = st.slider(
-    'What reading ages do you want to cater for?',
-    5, 18, (2, 18)
-)
-
-# Generate Comprehension Questions
+        ### Select Subject ###
 
 
-ls_technique = st.multiselect('What Learning Science technique do you want to use?', ['Writing Revolution', 'Dual Coding'])
+        ### Select Age slider - lowest and highest ###
 
-### Select word or PDF ###
+        add_slider = st.slider(
+            'What reading ages do you want to cater for?',
+            5, 18, (2, 18)
+        )
 
-f = open('worksheet.html','w')
-
-worksheet_head = f"""<html>
-<head></head>
-<h1>{worksheet_title}</h1>
-<body><p>Read this text ... </p>
-<p>{learn_text}</p>"""
-
-qp = [question + '</p>' for question in questions]
-worksheet_questions = '<p>'.join(qp)
+        # Generate Comprehension Questions
 
 
-worksheet_end = """</body>
-</html>"""
+        ls_technique = st.multiselect('What Learning Science technique do you want to use?', ['Writing Revolution', 'Dual Coding'])
 
-full_worksheet = worksheet_head + worksheet_questions + worksheet_end
+        query_string = worksheet_title
+        downloader.download(query_string, limit=2,  output_dir='images', adult_filter_off=False, force_replace=False, timeout=60, verbose=True)
+        # More options here: https://pypi.org/project/bing-image-downloader/
 
-f.write(full_worksheet)
-f.close()
+        ### Select word or PDF ###
 
-new_parser = HtmlToDocx()
-new_parser.parse_html_file("worksheet.html", "worksheet")
+        f = open('worksheet.html','w')
 
-# doc = aw.Document("worksheet.html")
-# doc.save("worksheet.docx")
+        # folder path
+        dir_path = f'images/{query_string}'
 
-# # word first #
-# # create document object
-# doc = aw.Document()
+        # list to store files
+        res = []
 
-# # create a document builder object
-# builder = aw.DocumentBuilder(doc)
+        # Iterate directory
+        for path in os.listdir(dir_path):
+            # check if current path is a file
+            if os.path.isfile(os.path.join(dir_path, path)):
+                res.append(path)
+        print(res)
 
-# # add text to the document
-# builder.write(st.session_state.knowledge)
+        #<img src="images/{query_string}/Image_1.jpg" alt="Image 1">
 
-# doc.save("current_doc.docx")
+        worksheet_head = f"""<html>
+        <head>
+        <style>
+        </style>
+        </head>
+        <h1>{worksheet_title}</h1>
+        <body>
+        <img src="images/{query_string}/{res[0]}" alt="Image 1" style="float:left;width:15px;height:15px;"
+        <img src="images/{query_string}/{res[1]}" alt="Image 2" style="float:right;width:15px;height:15px;">
+        <p>Read this text ... </p>
+        <p>{learn_text}</p>"""
 
-# st.download_button('Download file', doc)
+        qp = [question + '</p>' for question in questions]
+        worksheet_questions = '<p>'.join(qp)
 
-file_path = 'worksheet.docx'
-with open(file_path,"rb") as f:
-    base64_word = base64.b64encode(f.read()).decode('utf-8')
+        worksheet_end = """</body>
+        </html>"""
+
+        full_worksheet = worksheet_head + worksheet_questions + worksheet_end
+
+        f.write(full_worksheet)
+        f.close()
+
+        new_parser = HtmlToDocx()
+        new_parser.parse_html_file("worksheet.html", "worksheet")
+
+        # doc = aw.Document("worksheet.html")
+        # doc.save("worksheet.docx")
+
+        # # word first #
+        # # create document object
+        # doc = aw.Document()
+
+        # # create a document builder object
+        # builder = aw.DocumentBuilder(doc)
+
+        # # add text to the document
+        # builder.write(st.session_state.knowledge)
+
+        # doc.save("current_doc.docx")
+
+        # st.download_button('Download file', doc)
+
+        file_path = 'worksheet.docx'
+        with open(file_path,"rb") as f:
+            base64_word = base64.b64encode(f.read()).decode('utf-8')
 
 
-# word_display = f'<iframe src="data:application/docx;base64,{base64_word}" width="800" height="800" type="application/docx"></iframe>'
+        # word_display = f'<iframe src="data:application/docx;base64,{base64_word}" width="800" height="800" type="application/docx"></iframe>'
 
-# st.markdown(word_display, unsafe_allow_html=True)
+        # st.markdown(word_display, unsafe_allow_html=True)
 
-# FOr downloading word doc or pdf: https://towardsdatascience.com/display-and-download-pdf-in-streamlit-a-blog-use-case-5fc1ac87d4b1
+        # FOr downloading word doc or pdf: https://towardsdatascience.com/display-and-download-pdf-in-streamlit-a-blog-use-case-5fc1ac87d4b1
 
-with open("worksheet.docx", "rb") as word_file:
-    wordbyte = word_file.read()
+        with open("worksheet.docx", "rb") as word_file:
+            wordbyte = word_file.read()
 
-st.download_button(label="Download Custom Worksheet", 
-        data=wordbyte,
-        file_name="worksheet_doc_test.docx",
-        mime='application/octet-stream')
+    st.download_button(label="Download Custom Worksheet", 
+            data=wordbyte,
+            file_name="worksheet_doc_test.docx",
+            mime='application/octet-stream')
