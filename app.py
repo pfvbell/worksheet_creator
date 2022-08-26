@@ -16,7 +16,6 @@ import pickle
 import uuid
 import re
 import shutil
-import wmi
 
 st.title('Pedagogical.')
 st.subheader('🔥 Worksheet-Creator Prototype 🔥')
@@ -29,24 +28,11 @@ learn_text = st.text_input("Insert what you want your students to learn", key="k
 ls_technique = st.multiselect('What do you want your students to practice?', ['Writing', 'Knowledge'])
 downloaded = False
 
-# Initializing the wmi constructor
-f = wmi.WMI()
-
-# Printing the header for the later columns
-print("pid   Process name")
-
-# Iterating through all the running processes
-for process in f.Win32_Process():
-    
-    # Displaying the P_ID and P_Name of the process
-    print(f"{process.ProcessId:<10} {process.Name}")
-
 if learn_text:
     if downloaded == False:
         with st.spinner(text='In progress'):
 
             # Define Question Generator
-            @st.cache
             qg = QuestionGenerator()
             qa_list = qg.generate(
                 learn_text, 
