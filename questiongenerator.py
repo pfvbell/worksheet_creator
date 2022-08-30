@@ -21,7 +21,6 @@ class QuestionGenerator:
     been generated. Only the top k questions will be returned. This behaviour can be turned off
     by setting use_evaluator=False.
     """
-
     def __init__(self) -> None:
 
         QG_PRETRAINED = "iarfmoose/t5-base-question-generator"
